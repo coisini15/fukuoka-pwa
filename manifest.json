@@ -1,0 +1,21 @@
+{
+  "name": "日本福岡6天旅遊",
+  "short_name": "福岡旅遊",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0D0D0D",
+  "theme_color": "#0D0D0D",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "1080x1080",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "1080x1080",
+      "type": "image/png"
+    }
+  ]
+}

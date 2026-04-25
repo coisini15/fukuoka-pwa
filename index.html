@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>日本福岡6天旅遊</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0D0D0D">
+    <link rel="icon" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+
+    <!-- 下面原本你的 CSS / JS 不要動 -->
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Noto Sans TC, Noto Serif JP -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#0D0D0D',
+                        gold: {
+                            light: '#D4AF37',
+                            DEFAULT: '#C5A028',
+                            dark: '#A68018'
+                        },
+                        card: '#1A1A1A',
+                        accent: '#FF3B30'
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        serif: ['Noto Serif JP', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            body { @apply bg-obsidian text-gray-200 font-sans; -webkit-tap-highlight-color: transparent; }
+            ::-webkit-scrollbar { display: none; }
+        }
+        .luxury-shadow { box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7); }
+        .gold-border { @apply border border-gold/30; }
+        .glass-nav { @apply bg-black/80 backdrop-blur-lg border-t border-white/10; }
+        .nav-item { @apply flex flex-col items-center justify-center text-gray-500 transition-all duration-300; }
+        .nav-item.active { @apply text-gold; }
+        .day-btn { @apply flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center border border-white/10 bg-card transition-all; }
+        .day-btn.active { @apply border-gold bg-gold/10 text-gold scale-105; }
+        .important { @apply text-accent font-bold; }
+        .small-tag { @apply text-[10px] text-accent font-normal; }
+        .modal-overlay { @apply fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300; }
+        .modal-overlay.active { @apply flex opacity-100; }
+        .btn-gold { @apply bg-gradient-to-r from-gold-dark to-gold text-black font-bold py-3 px-6 rounded-xl active:scale-95 transition-transform; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <!-- Header Section -->
+    <header class="px-6 pt-10 pb-6 border-b border-white/10 bg-card">
+        <h1 class="text-3xl font-serif text-gold mb-2">日本福岡6天旅遊</h1>
+        <div class="flex justify-between items-end">
+            <div class="text-xs text-gray-400">
+                <p>2026/08/12 - 08/17</p>
+                <p class="mt-1 flex items-center gap-1">
+                    <i class="fas fa-plane-departure text-gold"></i> TPE 08:00 (T2) ✈ FUK 11:20 (T1)
+                </p>
+                <p class="mt-1 flex items-center gap-1 text-accent">
+                    <i class="fas fa-plane-arrival"></i> FUK 12:20 (T1) ✈ TPE 13:45 (T2)
+                </p>
+            </div>
+            <div id="weather-widget" class="text-right">
+                <p class="text-[10px] uppercase tracking-widest text-gold">Fukuoka Weather</p>
+                <p id="temp-display" class="text-2xl font-serif">--°C</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Pages -->
+    <main class="p-6">
+        
+        <!-- Page: PLAN -->
+        <div id="page-plan" class="page">
+            <div class="flex overflow-x-auto gap-4 no-scrollbar pb-6 snap-x" id="day-selector">
+                <!-- Day buttons injected by JS -->
+            </div>
+
+            <div id="itinerary-list" class="space-y-6">
+                <!-- Itinerary cards injected by JS -->
+            </div>
+
+            <div class="mt-10 p-6 rounded-3xl bg-card border border-gold/20 luxury-shadow">
+                <h3 class="text-gold font-serif mb-4"><i class="fas fa-plus-circle mr-2"></i>新增自訂行程</h3>
+                <div class="space-y-3">
+                    <input type="text" id="add-loc-name" placeholder="地點名稱" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-gold">
+                    <input type="text" id="add-loc-time" placeholder="時間 (選填, 如 14:00)" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-gold">
+                    <textarea id="add-loc-desc" placeholder="行程備註 (選填)" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-gold h-20"></textarea>
+                    <button onclick="addUserLocation()" class="btn-gold w-full">確認新增至當日</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: STAY -->
+        <div id="page-stay" class="page hidden">
+            <h2 class="text-2xl font-serif text-gold mb-4">博多新幹線口KOKO國際飯店</h2>
+            <div class="rounded-3xl overflow-hidden gold-border mb-6 luxury-shadow">
+                <img src="https://cdn.phototourl.com/free/2026-04-24-61320472-511a-4c49-a2b4-515b5ae082c2.png" alt="Hotel" class="w-full">
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div class="bg-card p-5 rounded-3xl border border-white/5 luxury-shadow">
+                    <div class="space-y-3 text-sm">
+                        <p class="flex items-start gap-3"><i class="fas fa-map-marker-alt text-gold mt-1"></i> 〒812-0013 福岡県福岡市博多区博多駅東1丁目17-17</p>
+                        <p class="flex items-center gap-3"><i class="fas fa-phone text-gold"></i> +81-92-431-0111</p>
+                        <p class="flex items-center gap-3"><i class="fas fa-calendar-alt text-gold"></i> 8/12 - 8/17 (5晚)</p>
+                        <p class="flex items-center gap-3"><i class="fas fa-clock text-gold"></i> 入住: <span class="text-gold font-bold">15:00</span> ‧ 退房: <span class="text-accent">10:00</span></p>
+                    </div>
+                    
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        <span class="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold">免費 Wi-Fi</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold">大浴場</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold">洗衣機</span>
+                        <span class="bg-gold/20 text-gold px-3 py-1 rounded-full text-[10px] font-bold">早餐附餐</span>
+                    </div>
+                </div>
+
+                <div class="bg-card p-5 rounded-3xl border border-white/5 luxury-shadow">
+                    <h4 class="text-gold text-xs font-bold uppercase mb-3">附近快速資訊</h4>
+                    <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
+                        <div class="p-2 bg-black/30 rounded-xl"><i class="fas fa-shopping-cart text-gold block mb-1"></i>超商 2min</div>
+                        <div class="p-2 bg-black/30 rounded-xl"><i class="fas fa-subway text-gold block mb-1"></i>博多站 5min</div>
+                        <div class="p-2 bg-black/30 rounded-xl"><i class="fas fa-utensils text-gold block mb-1"></i>餐廳多</div>
+                    </div>
+                </div>
+
+                <div class="bg-card p-5 rounded-3xl border border-white/5 luxury-shadow">
+                    <h4 class="text-gold text-xs font-bold uppercase mb-3">住宿備註</h4>
+                    <textarea id="stay-notes" placeholder="入住須知、櫃台要求..." class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-xs outline-none focus:border-gold h-24" oninput="saveStayData()"></textarea>
+                </div>
+
+                <div class="bg-card p-5 rounded-3xl border border-white/5 luxury-shadow">
+                    <h4 class="text-gold text-xs font-bold uppercase mb-3">住宿照片紀錄</h4>
+                    <div id="stay-photos-grid" class="grid grid-cols-3 gap-2 mb-4"></div>
+                    <label class="block w-full py-4 border-2 border-dashed border-white/10 rounded-2xl text-center text-xs text-gray-500 cursor-pointer hover:border-gold transition-colors">
+                        <i class="fas fa-camera mb-1 block text-lg"></i> 上傳照片
+                        <input type="file" accept="image/*" class="hidden" onchange="uploadStayPhoto(this)">
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mt-6 rounded-3xl overflow-hidden gold-border luxury-shadow">
+                <img src="https://cdn.phototourl.com/free/2026-04-24-d5fe302d-658f-4ccd-9f2f-c5ef31abb4b6.png" alt="Hotel Footer" class="w-full">
+            </div>
+        </div>
+
+        <!-- Page: WALLET -->
+        <div id="page-wallet" class="page hidden">
+            <h2 class="text-2xl font-serif text-gold mb-6">記帳與匯率</h2>
+            
+            <!-- Calculator -->
+            <div class="bg-card p-6 rounded-[2rem] border border-gold/20 luxury-shadow mb-8">
+                <div class="text-right mb-4">
+                    <div id="calc-expression" class="text-[10px] text-gray-500 h-4"></div>
+                    <div id="calc-display" class="text-3xl font-serif text-white">0</div>
+                    <div class="text-gold text-sm font-bold mt-1">≈ TWD <span id="calc-twd">0</span></div>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="calcClear()" class="h-12 bg-accent/20 text-accent rounded-xl font-bold">C</button>
+                    <button onclick="calcOp('/')" class="h-12 bg-white/5 rounded-xl font-bold">/</button>
+                    <button onclick="calcOp('*')" class="h-12 bg-white/5 rounded-xl font-bold">×</button>
+                    <button onclick="calcDelete()" class="h-12 bg-white/5 rounded-xl font-bold"><i class="fas fa-backspace"></i></button>
+                    
+                    <button onclick="calcNum('7')" class="h-12 bg-white/5 rounded-xl font-bold">7</button>
+                    <button onclick="calcNum('8')" class="h-12 bg-white/5 rounded-xl font-bold">8</button>
+                    <button onclick="calcNum('9')" class="h-12 bg-white/5 rounded-xl font-bold">9</button>
+                    <button onclick="calcOp('-')" class="h-12 bg-white/5 rounded-xl font-bold">-</button>
+                    
+                    <button onclick="calcNum('4')" class="h-12 bg-white/5 rounded-xl font-bold">4</button>
+                    <button onclick="calcNum('5')" class="h-12 bg-white/5 rounded-xl font-bold">5</button>
+                    <button onclick="calcNum('6')" class="h-12 bg-white/5 rounded-xl font-bold">6</button>
+                    <button onclick="calcOp('+')" class="h-12 bg-white/5 rounded-xl font-bold">+</button>
+                    
+                    <button onclick="calcNum('1')" class="h-12 bg-white/5 rounded-xl font-bold">1</button>
+                    <button onclick="calcNum('2')" class="h-12 bg-white/5 rounded-xl font-bold">2</button>
+                    <button onclick="calcNum('3')" class="h-12 bg-white/5 rounded-xl font-bold">3</button>
+                    <button onclick="calcEqual()" class="h-26 row-span-2 bg-gold text-black rounded-xl font-black">=</button>
+                    
+                    <button onclick="calcNum('0')" class="h-12 col-span-2 bg-white/5 rounded-xl font-bold">0</button>
+                    <button onclick="calcNum('.')" class="h-12 bg-white/5 rounded-xl font-bold">.</button>
+                </div>
+                <div class="mt-4 flex items-center justify-between px-2">
+                    <span class="text-[10px] text-gray-500">自訂匯率 (JPY to TWD)</span>
+                    <input type="number" id="custom-rate" value="0.21" step="0.01" class="w-16 bg-transparent border-b border-gold/50 text-right text-xs outline-none text-gold" onchange="updateCalcTWD()">
+                </div>
+            </div>
+
+            <!-- Add Record -->
+            <div class="bg-card p-6 rounded-[2rem] border border-white/5 luxury-shadow mb-8">
+                <div class="flex gap-2 mb-4">
+                    <button onclick="setWalletType('expense')" id="btn-expense" class="flex-1 py-3 rounded-xl font-bold text-xs bg-gold text-black">支出</button>
+                    <button onclick="setWalletType('income')" id="btn-income" class="flex-1 py-3 rounded-xl font-bold text-xs bg-white/5 text-gray-500">收入</button>
+                </div>
+                <div class="space-y-3">
+                    <input type="text" id="wallet-name" placeholder="品項名稱" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-gold text-sm">
+                    <input type="number" id="wallet-jpy" placeholder="日幣金額" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-gold text-sm">
+                    
+                    <div id="wallet-img-preview" class="hidden relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 mt-2">
+                        <img id="preview-img" src="" class="w-full h-full object-cover">
+                        <button onclick="clearWalletImg()" class="absolute top-2 right-2 bg-black/60 w-8 h-8 rounded-full text-white text-xs"><i class="fas fa-times"></i></button>
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                        <label class="flex-1 py-3 border border-white/10 rounded-xl text-center text-xs cursor-pointer hover:bg-white/5">
+                            <i class="fas fa-camera mr-1"></i> 上傳收據
+                            <input type="file" accept="image/*" class="hidden" onchange="handleWalletImg(this)">
+                        </label>
+                        <button onclick="addWalletRecord()" class="flex-[2] btn-gold">儲存紀錄</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List -->
+            <div id="wallet-list" class="space-y-3">
+                <!-- Records injected here -->
+            </div>
+        </div>
+
+        <!-- Page: LISTS -->
+        <div id="page-list" class="page hidden">
+            <h2 class="text-2xl font-serif text-gold mb-6">行李清單 & 備忘</h2>
+            
+            <div id="checklists-container" class="space-y-8 mb-12">
+                <!-- Checklists injected here -->
+            </div>
+
+            <div class="bg-card p-6 rounded-[2rem] border border-white/5 luxury-shadow">
+                <h3 class="text-gold font-serif mb-4"><i class="fas fa-sticky-note mr-2"></i>個人備忘錄</h3>
+                <div id="memo-container" class="space-y-3 mb-4">
+                    <!-- Memos injected here -->
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="memo-input" placeholder="輸入文字或網址..." class="flex-1 bg-black/40 border border-white/10 p-3 rounded-xl outline-none text-xs">
+                    <button onclick="addMemo()" class="w-12 bg-gold text-black rounded-xl flex items-center justify-center active:scale-90 transition-transform"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: INFO -->
+        <div id="page-info" class="page hidden">
+            <h2 class="text-2xl font-serif text-gold mb-6">旅遊資訊與禁忌</h2>
+            
+            <div class="space-y-4">
+                <button onclick="showInfoModal('carry')" class="w-full p-6 bg-card rounded-[2rem] border border-white/10 flex justify-between items-center luxury-shadow">
+                    <span class="font-bold">僅可手提、隨身物品</span>
+                    <i class="fas fa-chevron-right text-gold"></i>
+                </button>
+                <button onclick="showInfoModal('checkin')" class="w-full p-6 bg-card rounded-[2rem] border border-white/10 flex justify-between items-center luxury-shadow">
+                    <span class="font-bold">僅可託運物品</span>
+                    <i class="fas fa-chevron-right text-gold"></i>
+                </button>
+
+                <div class="bg-card p-6 rounded-[2rem] border border-accent/20 luxury-shadow mt-4">
+                    <h4 class="text-accent text-xs font-black uppercase mb-3 tracking-widest">緊急聯絡資訊</h4>
+                    <ul class="text-xs space-y-2">
+                        <li class="flex justify-between"><span>警察</span><span class="font-serif">110</span></li>
+                        <li class="flex justify-between"><span>救護車 / 消防</span><span class="font-serif">119</span></li>
+                        <li class="flex justify-between"><span>台北駐日辦事處 (福岡)</span><span class="font-serif">+81-92-734-2810</span></li>
+                    </ul>
+                </div>
+
+                <div class="bg-card p-6 rounded-[2rem] border border-white/5 luxury-shadow">
+                    <h4 class="text-gold text-xs font-black uppercase mb-3 tracking-widest">日本旅遊禁忌與注意</h4>
+                    <ul class="text-xs text-gray-400 space-y-3 leading-relaxed">
+                        <li>• <span class="text-gray-200">室內脫鞋</span>：進入榻榻米房間或部分餐廳必須脫鞋。</li>
+                        <li>• <span class="text-gray-200">公共安靜</span>：電車內禁止講電話，請保持靜音模式。</li>
+                        <li>• <span class="text-gray-200">禁用邊走邊吃</span>：部分地區（如商店街）視此為不禮貌行為。</li>
+                        <li>• <span class="text-gray-200">違禁品注意</span>：嚴禁攜帶肉類製品（含加工肉）、鮮果入境。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: COUPONS -->
+        <div id="page-coupons" class="page hidden">
+            <h2 class="text-2xl font-serif text-gold mb-6 text-center">日本店家優惠券</h2>
+            <div id="coupons-list" class="grid grid-cols-2 gap-4">
+                <!-- Coupons injected here -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modals -->
+    <div id="modal-info" class="modal-overlay" onclick="closeModal()">
+        <div class="max-w-md w-full bg-card rounded-[2rem] overflow-hidden gold-border" onclick="event.stopPropagation()">
+            <img id="modal-img" src="" class="w-full h-auto">
+            <button onclick="closeModal()" class="w-full py-4 text-xs font-bold text-gray-500">關閉</button>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-6 left-6 right-6 h-20 glass-nav rounded-[2.5rem] flex items-center justify-around px-4 luxury-shadow z-40">
+        <button onclick="switchPage('plan')" class="nav-item active" id="nav-plan">
+            <i class="fas fa-calendar-day text-lg"></i>
+            <span class="text-[8px] font-bold mt-1 uppercase">Plan</span>
+        </button>
+        <button onclick="switchPage('stay')" class="nav-item" id="nav-stay">
+            <i class="fas fa-hotel text-lg"></i>
+            <span class="text-[8px] font-bold mt-1 uppercase">Stay</span>
+        </button>
+        <button onclick="switchPage('wallet')" class="nav-item" id="nav-wallet">
+            <i class="fas fa-wallet text-lg"></i>
+            <span class="text-[8px] font-bold mt-1 uppercase">Wallet</span>
+        </button>
+        <button onclick="switchPage('list')" class="nav-item" id="nav-list">
+            <i class="fas fa-clipboard-list text-lg"></i>
+            <span class="text-[8px] font-bold mt-1 uppercase">List</span>
+        </button>
+        <button onclick="switchPage('info')" class="nav-item" id="nav-info">
+            <i class="fas fa-info-circle text-lg"></i>
+            <span class="text-[8px] font-bold mt-1 uppercase">Info</span>
+        </button>
+        <button onclick="switchPage('coupons')" class="nav-item" id="nav-coupons">
+            <i class="fas fa-ticket-alt text-lg"></i>
+            <span class="text-[8px] font-bold mt-1 uppercase">Coupon</span>
+        </button>
+    </nav>
+
+    <script>
+        // --- Data Definitions ---
+        const INITIAL_PLAN = {
+            1: [
+                { time: '11:20', loc: '抵達福岡機場', desc: '', photos: [] },
+                { time: '', loc: '博多新幹線口WING國際飯店', desc: '', photos: [] },
+                { time: '', loc: '唐吉訶德 中洲店', desc: '', photos: [] }
+            ],
+            2: [
+                { time: '07:40', loc: 'HEARTS Bus Station Hakata 一樓', desc: '【尋找手持YOUTOURBUS標識旗子的導遊報到】', photos: [], important: true },
+                { time: '', loc: '由布院', desc: '', photos: [] },
+                { time: '', loc: '由布岳 (3hr)', desc: '', photos: [] },
+                { time: '', loc: '灶地獄 (15min)', desc: '', photos: [] },
+                { time: '', loc: '太宰府天滿宮 (40min)', desc: '【該站離團，自行逛】', photos: [] }
+            ],
+            3: [
+                { time: '', loc: '柳川', desc: '【福岡到柳川需地鐵轉西鐵】', photos: [] },
+                { time: '', loc: '立花家史料館', desc: '【門票　￥１０００】', photos: [] },
+                { time: '', loc: '元祖本吉屋 沖端店', desc: '', photos: [] },
+                { time: '', loc: '柳川遊船伯舟觀光', desc: '【包船方案：40min】', photos: [] },
+                { time: '17:00', loc: '龜之井飯店 柳川', desc: '【預計抵達】', photos: [], important: true }
+            ],
+            4: [
+                { time: '', loc: '天神大名區', desc: '', photos: [], icon: 'heart', link: 'https://cdn.phototourl.com/free/2026-04-24-494e507f-5268-4432-8cfc-b0edd2333e7b.png' },
+                { time: '', loc: 'いくら博多店', desc: '', photos: [] },
+                { time: '', loc: 'Blue Bottle', desc: '', photos: [] },
+                { time: '', loc: '警固神社', desc: '', photos: [] },
+                { time: '', loc: '天神地下街', desc: '', photos: [] }
+            ],
+            5: [
+                { time: '', loc: '天神地下街', desc: '', photos: [] },
+                { time: '', loc: '博多運河城', desc: '', photos: [], icon: 'star', link: 'https://cdn.phototourl.com/free/2026-04-24-bf617242-4380-42a4-86b4-3cc417659400.png' },
+                { time: '', loc: 'Mina天神百貨', desc: '', photos: [], icon: 'heart', link: 'https://cdn.phototourl.com/free/2026-04-24-68cbd0b4-83b0-4344-a9fb-56bbbf0b1500.png' },
+                { time: '', loc: '岩田屋', desc: '', photos: [], icon: 'heart', link: 'https://cdn.phototourl.com/free/2026-04-24-0652fd9e-852a-43d1-af8c-8d074e9752d1.png' }
+            ],
+            6: [
+                { time: '12:20', loc: '福岡機場', desc: '回程手續', photos: [], important: true }
+            ]
+        };
+
+        const INITIAL_LISTS = [
+            { title: "隨身", items: ["護照", "機票", "日幣", "信用卡", "風扇", "行動電源", "拍立得", "電池"] },
+            { title: "託運", items: ["衣物", "襪子", "化妝品", "保養品", "充電器", "貼身衣物"] },
+            { title: "夏日建議", items: ["墨鏡", "遮陽傘", "小毛巾", "薄外套"] }
+        ];
+
+        const COUPONS = [
+            { name: "唐吉訶德", link: "https://japanportal.donki-global.com/coupon/cp001_zhtw.html", img: "fas fa-shopping-bag" },
+            { name: "札幌藥妝", link: "https://app.likejapan.com/zh-hk/coupon/sapporo-drug", img: "fas fa-pills" },
+            { name: "松本清", link: "https://www.chictrip.com.tw/service/Coupon/db9aed96-5e74-4609-8faa-c1f47b8ba41b", img: "fas fa-mortar-pestle" },
+            { name: "大國藥妝", link: "https://www.chictrip.com.tw/service/Coupon/3b333aab-9a2a-4eb3-abf9-6279770f3396", img: "fas fa-first-aid" },
+            { name: "BIC CAMERA", link: "https://www.chictrip.com.tw/service/Coupon/1cd6a346-2800-4f8a-924d-bff9379d0d81", img: "fas fa-camera" },
+            { name: "愛電王", link: "https://www.chictrip.com.tw/service/Coupon/f827d659-704e-41c2-a36c-a2b00ecb2544", img: "fas fa-plug" },
+            { name: "大丸百貨", link: "https://www.chictrip.com.tw/service/Coupon/4c1ec9f9-f90d-4766-9ea8-cb43abb4dc16", img: "fas fa-building" }
+        ];
+
+        // --- State Management ---
+        let state = {
+            currentDay: 1,
+            plan: JSON.parse(localStorage.getItem('fukuoka_plan')) || INITIAL_PLAN,
+            stay: JSON.parse(localStorage.getItem('fukuoka_stay')) || { notes: '', photos: [] },
+            wallet: JSON.parse(localStorage.getItem('fukuoka_wallet')) || [],
+            walletType: 'expense',
+            tempWalletImg: null,
+            lists: JSON.parse(localStorage.getItem('fukuoka_lists')) || null,
+            memo: JSON.parse(localStorage.getItem('fukuoka_memo')) || []
+        };
+
+        // --- Utils ---
+        function saveAll() {
+            localStorage.setItem('fukuoka_plan', JSON.stringify(state.plan));
+            localStorage.setItem('fukuoka_stay', JSON.stringify(state.stay));
+            localStorage.setItem('fukuoka_wallet', JSON.stringify(state.wallet));
+            localStorage.setItem('fukuoka_lists', JSON.stringify(state.lists));
+            localStorage.setItem('fukuoka_memo', JSON.stringify(state.memo));
+        }
+
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const MAX_WIDTH = 600;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                }
+            }
+        }
+
+        // --- Navigation ---
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById('page-' + pageId).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('nav-' + pageId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- Weather Service ---
+        async function updateWeather() {
+            try {
+                // Using Open-Meteo for free weather data (Fukuoka coords)
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=33.5902&longitude=130.4017&current_weather=true`);
+                const data = await res.json();
+                const temp = Math.round(data.current_weather.temperature);
+                document.getElementById('temp-display').innerText = temp + '°C';
+                // Also update in all plan cards if needed
+                document.querySelectorAll('.card-weather').forEach(el => el.innerText = temp + '°C');
+            } catch (e) {
+                console.log('Weather fetch failed');
+            }
+        }
+
+        // --- PLAN Logic ---
+        function renderPlan() {
+            const selector = document.getElementById('day-selector');
+            selector.innerHTML = '';
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.createElement('button');
+                btn.className = `day-btn snap-center ${state.currentDay === i ? 'active' : ''}`;
+                btn.onclick = () => { state.currentDay = i; renderPlan(); };
+                btn.innerHTML = `<span class="text-[10px] uppercase font-bold tracking-widest opacity-50">Day</span><span class="text-2xl font-serif">${i}</span>`;
+                selector.appendChild(btn);
+            }
+
+            const list = document.getElementById('itinerary-list');
+            list.innerHTML = '';
+            const items = state.plan[state.currentDay] || [];
+            
+            items.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-card p-6 rounded-[2.5rem] border border-white/5 luxury-shadow relative";
+                
+                let descHtml = item.desc.replace(/【(.*?)】/g, '<span class="small-tag">【$1】</span>');
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            ${item.time ? `<span class="bg-gold/10 text-gold text-[10px] px-2 py-0.5 rounded font-bold">${item.time}</span>` : ''}
+                            ${item.important ? `<span class="text-accent text-[10px] font-bold"><i class="fas fa-exclamation-circle"></i> 集合</span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] text-gray-600"><i class="fas fa-temperature-low mr-1"></i><span class="card-weather">--°C</span></span>
+                            <button onclick="deletePlanItem(${idx})" class="text-gray-700 hover:text-accent"><i class="fas fa-trash-alt text-xs"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 mb-2">
+                        <h3 class="text-lg font-serif font-bold text-gray-100">${item.loc}</h3>
+                        ${item.icon ? `<i onclick="showInfoImgOnly('${item.link}')" class="fas fa-${item.icon} text-sm text-accent cursor-pointer animate-pulse"></i>` : ''}
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 mb-6 leading-relaxed">${descHtml}</div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-6" id="photo-grid-${idx}">
+                        ${(item.photos || []).map((p, pIdx) => `
+                            <div class="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
+                                <img src="${p}" class="w-full h-full object-cover" onclick="showFullImg('${p}')">
+                                <button onclick="deletePlanPhoto(${idx}, ${pIdx})" class="absolute top-1 right-1 bg-black/60 w-4 h-4 rounded-full text-[8px]"><i class="fas fa-times"></i></button>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex gap-2">
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.loc)}" target="_blank" class="flex-1 bg-gold/10 border border-gold/30 text-gold text-[10px] font-bold py-3 rounded-xl text-center">
+                            <i class="fas fa-location-arrow mr-1"></i> Google Maps 導航
+                        </a>
+                        <label class="bg-white/5 border border-white/10 text-gray-400 text-[10px] font-bold py-3 px-4 rounded-xl cursor-pointer">
+                            <i class="fas fa-camera mr-1"></i> 旅記
+                            <input type="file" accept="image/*" class="hidden" onchange="uploadPlanPhoto(${idx}, this)">
+                        </label>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            updateWeather();
+        }
+
+        function addUserLocation() {
+            const name = document.getElementById('add-loc-name').value;
+            const time = document.getElementById('add-loc-time').value;
+            const desc = document.getElementById('add-loc-desc').value;
+            if (!name) return;
+            
+            if (!state.plan[state.currentDay]) state.plan[state.currentDay] = [];
+            state.plan[state.currentDay].push({ loc: name, time, desc, photos: [] });
+            saveAll();
+            renderPlan();
+            
+            document.getElementById('add-loc-name').value = '';
+            document.getElementById('add-loc-time').value = '';
+            document.getElementById('add-loc-desc').value = '';
+        }
+
+        function deletePlanItem(idx) {
+            if (!confirm('確定刪除此行程地點？')) return;
+            state.plan[state.currentDay].splice(idx, 1);
+            saveAll();
+            renderPlan();
+        }
+
+        function uploadPlanPhoto(idx, input) {
+            if (!input.files[0]) return;
+            compressImage(input.files[0], base64 => {
+                if (!state.plan[state.currentDay][idx].photos) state.plan[state.currentDay][idx].photos = [];
+                state.plan[state.currentDay][idx].photos.push(base64);
+                saveAll();
+                renderPlan();
+            });
+        }
+
+        function deletePlanPhoto(itemIdx, photoIdx) {
+            state.plan[state.currentDay][itemIdx].photos.splice(photoIdx, 1);
+            saveAll();
+            renderPlan();
+        }
+
+        // --- STAY Logic ---
+        function renderStay() {
+            document.getElementById('stay-notes').value = state.stay.notes;
+            const grid = document.getElementById('stay-photos-grid');
+            grid.innerHTML = '';
+            state.stay.photos.forEach((p, idx) => {
+                const div = document.createElement('div');
+                div.className = "relative aspect-square rounded-xl overflow-hidden border border-white/10";
+                div.innerHTML = `
+                    <img src="${p}" class="w-full h-full object-cover" onclick="showFullImg('${p}')">
+                    <button onclick="deleteStayPhoto(${idx})" class="absolute top-1 right-1 bg-black/60 w-5 h-5 rounded-full text-[10px]"><i class="fas fa-trash-alt"></i></button>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function saveStayData() {
+            state.stay.notes = document.getElementById('stay-notes').value;
+            saveAll();
+        }
+
+        function uploadStayPhoto(input) {
+            if (!input.files[0]) return;
+            compressImage(input.files[0], base64 => {
+                state.stay.photos.push(base64);
+                saveAll();
+                renderStay();
+            });
+        }
+
+        function deleteStayPhoto(idx) {
+            state.stay.photos.splice(idx, 1);
+            saveAll();
+            renderStay();
+        }
+
+        // --- WALLET Logic ---
+        let calcVal = '0';
+        function updateCalcDisplay() {
+            document.getElementById('calc-display').innerText = calcVal;
+            updateCalcTWD();
+        }
+        function calcNum(n) {
+            if (calcVal === '0' && n !== '.') calcVal = n;
+            else calcVal += n;
+            updateCalcDisplay();
+        }
+        function calcOp(op) {
+            const last = calcVal.slice(-1);
+            if (['+', '-', '*', '/'].includes(last)) calcVal = calcVal.slice(0, -1) + op;
+            else calcVal += op;
+            updateCalcDisplay();
+        }
+        function calcClear() { calcVal = '0'; updateCalcDisplay(); }
+        function calcDelete() { 
+            calcVal = calcVal.length > 1 ? calcVal.slice(0, -1) : '0';
+            updateCalcDisplay();
+        }
+        function calcEqual() {
+            try {
+                calcVal = eval(calcVal).toString();
+                updateCalcDisplay();
+            } catch(e) { calcVal = 'Error'; updateCalcDisplay(); }
+        }
+        function updateCalcTWD() {
+            const rate = parseFloat(document.getElementById('custom-rate').value) || 0.21;
+            const current = parseFloat(calcVal) || 0;
+            document.getElementById('calc-twd').innerText = Math.round(current * rate).toLocaleString();
+        }
+
+        function setWalletType(t) {
+            state.walletType = t;
+            const isExp = t === 'expense';
+            document.getElementById('btn-expense').className = isExp ? 'flex-1 py-3 rounded-xl font-bold text-xs bg-gold text-black' : 'flex-1 py-3 rounded-xl font-bold text-xs bg-white/5 text-gray-500';
+            document.getElementById('btn-income').className = !isExp ? 'flex-1 py-3 rounded-xl font-bold text-xs bg-gold text-black' : 'flex-1 py-3 rounded-xl font-bold text-xs bg-white/5 text-gray-500';
+        }
+
+        function handleWalletImg(input) {
+            if (!input.files[0]) return;
+            compressImage(input.files[0], base64 => {
+                state.tempWalletImg = base64;
+                document.getElementById('preview-img').src = base64;
+                document.getElementById('wallet-img-preview').classList.remove('hidden');
+            });
+        }
+
+        function clearWalletImg() {
+            state.tempWalletImg = null;
+            document.getElementById('wallet-img-preview').classList.add('hidden');
+        }
+
+        function addWalletRecord() {
+            const name = document.getElementById('wallet-name').value;
+            const jpy = parseFloat(document.getElementById('wallet-jpy').value);
+            if (!name || !jpy) return;
+
+            const rate = parseFloat(document.getElementById('custom-rate').value) || 0.21;
+            state.wallet.unshift({
+                id: Date.now(),
+                name,
+                jpy,
+                twd: Math.round(jpy * rate),
+                type: state.walletType,
+                img: state.tempWalletImg
+            });
+
+            saveAll();
+            renderWallet();
+            
+            document.getElementById('wallet-name').value = '';
+            document.getElementById('wallet-jpy').value = '';
+            clearWalletImg();
+        }
+
+        function renderWallet() {
+            const list = document.getElementById('wallet-list');
+            list.innerHTML = '';
+            state.wallet.forEach((r, idx) => {
+                const div = document.createElement('div');
+                div.className = "bg-card p-4 rounded-2xl border border-white/5 luxury-shadow flex flex-col gap-3";
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black ${r.type === 'expense' ? 'bg-accent/20 text-accent' : 'bg-green-500/20 text-green-500'}">
+                                ${r.type === 'expense' ? '支' : '收'}
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-gray-200">${r.name}</h5>
+                                <p class="text-[8px] text-gray-600">${new Date(r.id).toLocaleTimeString()}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-serif ${r.type === 'expense' ? 'text-white' : 'text-green-500'}">¥${r.jpy.toLocaleString()}</div>
+                            <div class="text-[10px] text-gold">≈ $${r.twd}</div>
+                        </div>
+                    </div>
+                    ${r.img ? `
+                        <div class="relative rounded-xl overflow-hidden border border-white/10 group">
+                            <img src="${r.img}" class="w-full h-32 object-cover" onclick="showFullImg('${r.img}')">
+                            <button onclick="deleteWalletPhoto(${idx})" class="absolute top-2 right-2 bg-black/60 px-2 py-1 rounded-full text-[8px] text-accent"><i class="fas fa-trash-alt mr-1"></i> 刪除照片</button>
+                        </div>
+                    ` : ''}
+                    <div class="flex gap-2 border-t border-white/5 pt-2">
+                        <button onclick="deleteWalletRecord(${idx})" class="flex-1 text-[10px] text-gray-600 hover:text-accent font-bold py-1">刪除該紀錄</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function deleteWalletRecord(idx) {
+            state.wallet.splice(idx, 1);
+            saveAll();
+            renderWallet();
+        }
+
+        function deleteWalletPhoto(idx) {
+            state.wallet[idx].img = null;
+            saveAll();
+            renderWallet();
+        }
+
+        // --- LIST Logic ---
+        function renderLists() {
+            if (!state.lists) {
+                state.lists = INITIAL_LISTS.map(cat => ({
+                    title: cat.title,
+                    items: cat.items.map(i => ({ name: i, checked: false }))
+                }));
+            }
+
+            const container = document.getElementById('checklists-container');
+            container.innerHTML = '';
+            state.lists.forEach((cat, cIdx) => {
+                const section = document.createElement('div');
+                section.innerHTML = `
+                    <h4 class="text-[10px] font-black uppercase text-gold tracking-[0.3em] mb-4 pl-1">${cat.title}</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        ${cat.items.map((item, iIdx) => `
+                            <div onclick="toggleCheck(${cIdx}, ${iIdx})" class="p-4 rounded-2xl border border-white/5 bg-card flex items-center gap-3 transition-all ${item.checked ? 'opacity-30' : ''}">
+                                <div class="w-5 h-5 rounded-full border border-gold/50 flex items-center justify-center">
+                                    ${item.checked ? '<i class="fas fa-check text-[10px] text-gold"></i>' : ''}
+                                </div>
+                                <span class="text-xs ${item.checked ? 'line-through' : ''}">${item.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(section);
+            });
+
+            const memoList = document.getElementById('memo-container');
+            memoList.innerHTML = '';
+            state.memo.forEach((m, idx) => {
+                const div = document.createElement('div');
+                const isUrl = m.startsWith('http');
+                div.className = "flex items-center gap-2 group";
+                div.innerHTML = `
+                    ${isUrl ? 
+                        `<a href="${m}" target="_blank" class="flex-1 bg-gold/10 text-gold border border-gold/30 p-3 rounded-xl text-[10px] font-bold truncate"><i class="fas fa-link mr-1"></i> ${m}</a>` :
+                        `<div class="flex-1 bg-white/5 p-3 rounded-xl text-xs">${m}</div>`
+                    }
+                    <button onclick="deleteMemo(${idx})" class="w-10 text-gray-700 hover:text-accent"><i class="fas fa-trash-alt text-xs"></i></button>
+                `;
+                memoList.appendChild(div);
+            });
+        }
+
+        function toggleCheck(cIdx, iIdx) {
+            state.lists[cIdx].items[iIdx].checked = !state.lists[cIdx].items[iIdx].checked;
+            saveAll();
+            renderLists();
+        }
+
+        function addMemo() {
+            const input = document.getElementById('memo-input');
+            if (!input.value) return;
+            state.memo.push(input.value);
+            input.value = '';
+            saveAll();
+            renderLists();
+        }
+
+        function deleteMemo(idx) {
+            state.memo.splice(idx, 1);
+            saveAll();
+            renderLists();
+        }
+
+        // --- COUPONS Logic ---
+        function renderCoupons() {
+            const list = document.getElementById('coupons-list');
+            list.innerHTML = '';
+            COUPONS.forEach(c => {
+                const a = document.createElement('a');
+                a.href = c.link;
+                a.target = "_blank";
+                a.className = "bg-card p-6 rounded-[2rem] border border-white/5 flex flex-col items-center gap-3 luxury-shadow active:scale-95 transition-transform";
+                a.innerHTML = `
+                    <div class="w-12 h-12 rounded-2xl bg-gold/5 flex items-center justify-center text-gold text-xl">
+                        <i class="${c.img}"></i>
+                    </div>
+                    <span class="text-[10px] font-black uppercase text-gray-300 tracking-widest">${c.name}</span>
+                `;
+                list.appendChild(a);
+            });
+        }
+
+        // --- Modals ---
+        function showInfoModal(type) {
+            const urls = {
+                carry: 'https://cdn.phototourl.com/free/2026-04-24-93ba9e91-be8d-4a52-85e5-9cb96e0128de.png',
+                checkin: 'https://cdn.phototourl.com/free/2026-04-24-0dc9b153-e06c-4cc2-bbd8-fc7c381bd7e3.png'
+            };
+            document.getElementById('modal-img').src = urls[type];
+            document.getElementById('modal-info').classList.add('active');
+        }
+        function showFullImg(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('modal-info').classList.add('active');
+        }
+        function showInfoImgOnly(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('modal-info').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('modal-info').classList.remove('active');
+        }
+function openMap(location) {
+    const encoded = encodeURIComponent(location);
+
+    // 判斷裝置
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+
+    if (isIOS) {
+        // iPhone 直接開 Apple Maps
+        window.open(`http://maps.apple.com/?q=${encoded}`);
+    } else if (isAndroid) {
+        // Android 開 Google Maps App
+        window.open(`geo:0,0?q=${encoded}`);
+    } else {
+        // 電腦用瀏覽器
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`);
+    }
+}
+
+        // --- Init ---
+        renderPlan();
+        renderStay();
+        renderWallet();
+        renderLists();
+        renderCoupons();
+        updateWeather();
+
+    </script>
+</body>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered', reg))
+      .catch(err => console.log('SW failed', err));
+  });
+}
+</script>
+</html>
